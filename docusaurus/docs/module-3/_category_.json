@@ -1,0 +1,10 @@
+{
+  "label": "Module 3: The AI-Robot Brain",
+  "position": 4,
+  "link": {
+    "type": "doc",
+    "id": "module-3/index"
+  },
+  "collapsible": true,
+  "collapsed": true
+}

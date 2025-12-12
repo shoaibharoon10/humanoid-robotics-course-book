@@ -1,0 +1,10 @@
+{
+  "label": "Module 1: The Robotic Nervous System",
+  "position": 2,
+  "link": {
+    "type": "doc",
+    "id": "module-1/index"
+  },
+  "collapsible": true,
+  "collapsed": false
+}
