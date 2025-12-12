@@ -1,0 +1,10 @@
+{
+  "label": "Module 4: Vision-Language-Action",
+  "position": 5,
+  "link": {
+    "type": "doc",
+    "id": "module-4/index"
+  },
+  "collapsible": true,
+  "collapsed": true
+}

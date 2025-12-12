@@ -1,0 +1,101 @@
+/**
+ * Physical AI & Humanoid Robotics Textbook
+ * Custom CSS styling for educational content
+ */
+
+/* Primary color scheme - robotics blue/teal theme */
+:root {
+  --ifm-color-primary: #0077b6;
+  --ifm-color-primary-dark: #006ba3;
+  --ifm-color-primary-darker: #00659a;
+  --ifm-color-primary-darkest: #00537f;
+  --ifm-color-primary-light: #0083c9;
+  --ifm-color-primary-lighter: #0089d2;
+  --ifm-color-primary-lightest: #009bed;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 119, 182, 0.1);
+
+  /* Textbook-specific variables */
+  --ifm-font-family-base: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ifm-heading-font-family: var(--ifm-font-family-base);
+  --ifm-line-height-base: 1.65;
+  --ifm-leading: 1.5rem;
+}
+
+/* Dark mode - enhanced readability */
+[data-theme='dark'] {
+  --ifm-color-primary: #00b4d8;
+  --ifm-color-primary-dark: #00a2c2;
+  --ifm-color-primary-darker: #0099b8;
+  --ifm-color-primary-darkest: #007f97;
+  --ifm-color-primary-light: #00c6ee;
+  --ifm-color-primary-lighter: #00ccf8;
+  --ifm-color-primary-lightest: #1ad9ff;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 180, 216, 0.2);
+}
+
+/* Module cards styling */
+.module-card {
+  border-left: 4px solid var(--ifm-color-primary);
+  padding: 1rem;
+  margin: 1rem 0;
+  background: var(--ifm-background-surface-color);
+  border-radius: 0 8px 8px 0;
+}
+
+/* Topic list styling */
+.topic-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.topic-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.topic-list li:last-child {
+  border-bottom: none;
+}
+
+/* Prerequisites callout */
+.prerequisites {
+  background: rgba(0, 119, 182, 0.05);
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+[data-theme='dark'] .prerequisites {
+  background: rgba(0, 180, 216, 0.1);
+}
+
+/* Learning path diagram container */
+.learning-path {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+/* Code blocks - enhanced for ROS 2 / Python examples */
+.prism-code {
+  font-size: 0.9rem;
+}
+
+/* Admonitions - textbook style */
+.admonition {
+  border-radius: 8px;
+}
+
+/* Table of contents - better hierarchy */
+.table-of-contents {
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .module-card {
+    margin: 0.5rem 0;
+    padding: 0.75rem;
+  }
+}
