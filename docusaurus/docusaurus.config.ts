@@ -13,7 +13,7 @@ const baseUrl = isVercel ? '/' : '/humanoid-robotics-course-book/';
 
 const config: Config = {
   title: 'Physical AI & Humanoid Robotics',
-  tagline: 'A comprehensive guide to building intelligent humanoid robots',
+  tagline: 'Bridging the gap between the digital brain and the physical body.',
   favicon: 'img/favicon.ico',
 
   future: {
