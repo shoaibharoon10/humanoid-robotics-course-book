@@ -11,8 +11,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://shoaibharoon10.github.io',
-  baseUrl: '/humanoid-robotics-course-book/',
+  url: 'https://humanoid-robotics-course-book.vercel.app',
+  baseUrl: '/',
 
   organizationName: 'shoaibharoon10',
   projectName: 'humanoid-robotics-course-book',
