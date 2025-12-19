@@ -2,6 +2,15 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
+// Detect deployment platform
+const isVercel = process.env.VERCEL === '1';
+
+// Platform-specific configuration
+const url = isVercel
+  ? 'https://humanoid-robotics-course-book.vercel.app'
+  : 'https://shoaibharoon10.github.io';
+const baseUrl = isVercel ? '/' : '/humanoid-robotics-course-book/';
+
 const config: Config = {
   title: 'Physical AI & Humanoid Robotics',
   tagline: 'A comprehensive guide to building intelligent humanoid robots',
@@ -11,8 +20,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://humanoid-robotics-course-book.vercel.app',
-  baseUrl: '/',
+  url,
+  baseUrl,
 
   organizationName: 'shoaibharoon10',
   projectName: 'humanoid-robotics-course-book',
