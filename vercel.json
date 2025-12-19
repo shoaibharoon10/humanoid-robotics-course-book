@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd docusaurus && npm install && npm run build",
+  "outputDirectory": "docusaurus/build",
+  "framework": null,
+  "installCommand": "echo 'Install handled in buildCommand'"
+}
