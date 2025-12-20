@@ -15,3 +15,11 @@
   display: block;
   margin-bottom: 1rem;
 }
+
+.featureImage {
+  height: 200px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
