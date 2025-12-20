@@ -5,14 +5,14 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  image: string;
+  emoji: string;
   description: ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [
   {
     title: 'ROS 2 & Motion Control',
-    image: '/img/new-ros2-image.png',
+    emoji: '🤖',
     description: (
       <>
         Master Robot Operating System 2 fundamentals, sensor integration,
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'NVIDIA Isaac Simulation',
-    image: '/img/new-isaac-image.png',
+    emoji: '🎮',
     description: (
       <>
         Build and test robots in high-fidelity simulation with Isaac Sim,
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Vision-Language-Action AI',
-    image: '/img/new-vla-image.png',
+    emoji: '🧠',
     description: (
       <>
         Integrate cutting-edge AI with VLA models, voice control via Whisper,
@@ -42,11 +42,13 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-function Feature({title, image, description}: FeatureItem) {
+function Feature({title, emoji, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <img className={styles.featureImage} src={image} alt={title} />
+        <span className={styles.featureEmoji} role="img" aria-label={title}>
+          {emoji}
+        </span>
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
