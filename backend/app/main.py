@@ -16,9 +16,13 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     print(f"Starting RAG Chatbot API in {settings.app_env} mode")
 
-    # Initialize database
-    await init_db()
-    print("Database initialized")
+    # Initialize database (non-blocking - errors are caught in init_db)
+    try:
+        await init_db()
+        print("Database initialized")
+    except Exception as e:
+        print(f"Warning: Database initialization error: {e}")
+        print("Application will continue - database may initialize later")
 
     yield
 

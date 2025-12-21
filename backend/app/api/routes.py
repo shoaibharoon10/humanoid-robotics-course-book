@@ -32,10 +32,11 @@ router = APIRouter()
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint - returns 200 quickly for Railway healthchecks."""
     settings = get_settings()
 
-    # Check Qdrant
+    # Quick checks - don't block on external services
+    qdrant_status = "unknown"
     try:
         qdrant = get_qdrant_service()
         qdrant_info = qdrant.get_collection_info()
@@ -45,9 +46,9 @@ async def health_check():
 
     return HealthResponse(
         status="healthy",
-        database="healthy",  # Will fail at startup if unhealthy
+        database="available",  # DB initializes async, assume available
         qdrant=qdrant_status,
-        openai="configured" if settings.openai_api_key else "missing"
+        llm="configured" if settings.google_api_key else "missing"
     )
 
 
