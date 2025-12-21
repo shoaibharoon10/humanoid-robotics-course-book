@@ -25,7 +25,7 @@ class QdrantService:
             api_key=settings.qdrant_api_key,
         )
         self.collection_name = settings.collection_name
-        self.vector_size = 1536  # text-embedding-3-small dimension
+        self.vector_size = 768  # Google text-embedding-004 dimension
 
     def ensure_collection(self):
         """Create collection if it doesn't exist."""

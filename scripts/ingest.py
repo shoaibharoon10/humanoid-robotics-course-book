@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Ingestion script for RAG chatbot.
+Ingestion script for RAG chatbot using Google Gemini.
 
 Usage:
     python scripts/ingest.py --docs-path ./docusaurus/docs
 
 Environment Variables Required:
-    OPENAI_API_KEY
+    GOOGLE_API_KEY
     QDRANT_URL
     QDRANT_API_KEY
 """
@@ -23,7 +23,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
 from dotenv import load_dotenv
-from openai import AsyncOpenAI
+import google.generativeai as genai
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, Distance
 import uuid
@@ -32,23 +32,27 @@ from chunk_documents import MarkdownChunker, Chunk, chunk_to_payload
 
 
 class DocumentIngester:
-    """Ingestion pipeline for markdown documents."""
+    """Ingestion pipeline for markdown documents using Google Gemini."""
 
     def __init__(
         self,
         docs_path: str,
-        openai_api_key: str,
+        google_api_key: str,
         qdrant_url: str,
         qdrant_api_key: str,
         collection_name: str = "humanoid_robotics_docs"
     ):
         self.docs_path = Path(docs_path)
         self.chunker = MarkdownChunker(max_tokens=1500, overlap_tokens=200)
-        self.openai = AsyncOpenAI(api_key=openai_api_key)
+
+        # Configure Google Gemini
+        genai.configure(api_key=google_api_key)
+        self.embedding_model = "models/text-embedding-004"
+
+        # Configure Qdrant
         self.qdrant = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
         self.collection_name = collection_name
-        self.embedding_model = "text-embedding-3-small"
-        self.vector_size = 1536
+        self.vector_size = 768  # Google text-embedding-004 dimension
 
     def ensure_collection(self, recreate: bool = False):
         """Create collection if it doesn't exist."""
@@ -94,8 +98,8 @@ class DocumentIngester:
         print(f"\nTotal chunks: {len(all_chunks)}")
 
         # Generate embeddings
-        print("\nGenerating embeddings...")
-        embeddings = await self._generate_embeddings([c.text for c in all_chunks])
+        print("\nGenerating embeddings with Google Gemini...")
+        embeddings = self._generate_embeddings([c.text for c in all_chunks])
         print(f"Generated {len(embeddings)} embeddings")
 
         # Upsert to Qdrant
@@ -106,21 +110,29 @@ class DocumentIngester:
         # Print summary
         self._print_summary(all_chunks)
 
-    async def _generate_embeddings(
+    def _generate_embeddings(
         self,
         texts: List[str],
         batch_size: int = 100
     ) -> List[List[float]]:
-        """Generate embeddings using OpenAI API with batching."""
+        """Generate embeddings using Google Gemini API."""
         embeddings = []
 
         for i in range(0, len(texts), batch_size):
             batch = texts[i:i + batch_size]
-            response = await self.openai.embeddings.create(
-                model=self.embedding_model,
-                input=batch
-            )
-            embeddings.extend([e.embedding for e in response.data])
+            for text in batch:
+                try:
+                    result = genai.embed_content(
+                        model=self.embedding_model,
+                        content=text,
+                        task_type="retrieval_document"
+                    )
+                    embeddings.append(result['embedding'])
+                except Exception as e:
+                    print(f"  Error embedding text: {e}")
+                    # Use zero vector as fallback
+                    embeddings.append([0.0] * self.vector_size)
+
             print(f"  Embedded {min(i + batch_size, len(texts))}/{len(texts)} chunks")
 
         return embeddings
@@ -171,11 +183,7 @@ class DocumentIngester:
 
         print("-" * 50)
         print(f"  TOTAL: {len(chunks)} chunks, {total_tokens:,} tokens")
-
-        # Estimate embedding cost
-        cost_per_1m = 0.02  # text-embedding-3-small
-        estimated_cost = (total_tokens / 1_000_000) * cost_per_1m
-        print(f"  Estimated embedding cost: ${estimated_cost:.4f}")
+        print(f"  Using Google Gemini text-embedding-004 (FREE TIER)")
         print("=" * 50)
 
 
@@ -206,7 +214,7 @@ async def main():
     load_dotenv()
 
     # Validate environment
-    required_vars = ["OPENAI_API_KEY", "QDRANT_URL", "QDRANT_API_KEY"]
+    required_vars = ["GOOGLE_API_KEY", "QDRANT_URL", "QDRANT_API_KEY"]
     missing = [v for v in required_vars if not os.getenv(v)]
     if missing:
         print(f"Error: Missing environment variables: {', '.join(missing)}")
@@ -216,7 +224,7 @@ async def main():
     # Create ingester
     ingester = DocumentIngester(
         docs_path=args.docs_path,
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        google_api_key=os.getenv("GOOGLE_API_KEY"),
         qdrant_url=os.getenv("QDRANT_URL"),
         qdrant_api_key=os.getenv("QDRANT_API_KEY"),
         collection_name=args.collection

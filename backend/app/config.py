@@ -8,10 +8,10 @@ from typing import List
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
-    # OpenAI
-    openai_api_key: str
-    embedding_model: str = "text-embedding-3-small"
-    chat_model: str = "gpt-4o-mini"
+    # Google Gemini
+    google_api_key: str
+    embedding_model: str = "models/text-embedding-004"
+    chat_model: str = "gemini-1.5-flash"
     max_tokens: int = 1024
     temperature: float = 0.7
 

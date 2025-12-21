@@ -21,8 +21,8 @@ class RetrievalService:
         score_threshold: float = 0.7
     ) -> List[Source]:
         """Retrieve relevant documents for a query."""
-        # Generate query embedding
-        query_embedding = await self.embedding_service.embed_text(query)
+        # Generate query embedding (using query-optimized embedding)
+        query_embedding = self.embedding_service.embed_query(query)
 
         # Search in Qdrant
         results = self.qdrant_service.search(
@@ -53,8 +53,8 @@ class RetrievalService:
         filter_module: Optional[str] = None
     ) -> List[SearchResult]:
         """Search for documents without chat context."""
-        # Generate query embedding
-        query_embedding = await self.embedding_service.embed_text(query)
+        # Generate query embedding (using query-optimized embedding)
+        query_embedding = self.embedding_service.embed_query(query)
 
         # Search in Qdrant
         results = self.qdrant_service.search(
