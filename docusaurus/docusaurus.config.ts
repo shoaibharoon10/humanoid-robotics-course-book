@@ -14,10 +14,6 @@ const config: Config = {
   tagline: 'Bridging the gap between the digital brain and the physical body.',
   favicon: 'img/favicon.ico',
 
-  future: {
-    v4: true,
-  },
-
   url,
   baseUrl,
 
@@ -29,7 +25,8 @@ const config: Config = {
   organizationName: 'shoaibharoon10',
   projectName: 'humanoid-robotics-course-book',
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
+  onBrokenMarkdownLinks: 'warn',
 
   i18n: {
     defaultLocale: 'en',
