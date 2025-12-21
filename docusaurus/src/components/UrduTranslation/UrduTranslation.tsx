@@ -1,36 +1,42 @@
 /**
  * UrduTranslation component - Button to translate page content to Urdu using Google Translate.
- * Uses a simple URL redirect approach that works reliably on all platforms.
+ * Uses a standard anchor tag approach for reliable translation on all platforms.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './styles.module.css';
 
 export default function UrduTranslation(): JSX.Element {
-  const [isLoading, setIsLoading] = useState(false);
+  const [translateUrl, setTranslateUrl] = useState<string>('#');
+  const [isLocalhost, setIsLocalhost] = useState<boolean>(false);
 
-  const handleTranslate = useCallback(() => {
-    if (typeof window === 'undefined') return;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+      setIsLocalhost(isLocal);
 
-    setIsLoading(true);
+      if (isLocal) {
+        console.warn('Urdu Translation: Google Translate works best on production URLs. Local development URLs may not translate properly.');
+      }
 
-    // Get the current page URL
-    const currentUrl = window.location.href;
-
-    // Google Translate URL format - opens translated page in same tab
-    const translateUrl = `https://translate.google.com/translate?sl=en&tl=ur&u=${encodeURIComponent(currentUrl)}`;
-
-    // Navigate to the translated page
-    window.location.href = translateUrl;
+      // Build Google Translate URL
+      const currentUrl = window.location.href;
+      setTranslateUrl(`https://translate.google.com/translate?sl=en&tl=ur&u=${encodeURIComponent(currentUrl)}`);
+    }
   }, []);
 
   return (
     <div className={styles.container}>
-      <button
-        onClick={handleTranslate}
+      <a
+        href={translateUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         className={styles.translateButton}
-        disabled={isLoading}
-        title="Translate this page to Urdu (اردو میں ترجمہ کریں)"
+        title={isLocalhost
+          ? "Translation works best on production (اردو ترجمہ)"
+          : "Translate this page to Urdu (اردو میں ترجمہ کریں)"
+        }
         aria-label="Translate to Urdu"
       >
         <span className={styles.flag} aria-hidden="true">
@@ -50,10 +56,10 @@ export default function UrduTranslation(): JSX.Element {
           </svg>
         </span>
         <span className={styles.buttonText}>
-          {isLoading ? 'Translating...' : 'Urdu Translation'}
+          Urdu Translation
         </span>
         <span className={styles.urduText} dir="rtl">اردو ترجمہ</span>
-      </button>
+      </a>
     </div>
   );
 }

@@ -14,18 +14,21 @@
   border: 2px solid #01411C;
   border-radius: 8px;
   background: linear-gradient(135deg, #01411C 0%, #025920 100%);
-  color: #ffffff;
+  color: #ffffff !important;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(1, 65, 28, 0.2);
+  text-decoration: none !important;
 }
 
-.translateButton:hover:not(:disabled) {
+.translateButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(1, 65, 28, 0.3);
   background: linear-gradient(135deg, #025920 0%, #037530 100%);
+  color: #ffffff !important;
+  text-decoration: none !important;
 }
 
 .translateButton:active:not(:disabled) {
