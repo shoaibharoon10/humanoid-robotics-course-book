@@ -48,4 +48,4 @@ Driess, D., et al. (2023). PaLM-E: An Embodied Multimodal Language Model. *arXiv
 
 ---
 
-*This reference section will be expanded with detailed citations as chapter content is added in Iteration 2.*
+*For additional resources and updates, visit the official documentation links above or use the Robotics Assistant chatbot.*

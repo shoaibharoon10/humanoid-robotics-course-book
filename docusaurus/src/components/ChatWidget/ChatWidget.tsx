@@ -27,7 +27,7 @@ function getSessionId(): string {
 
 // Default configuration - apiUrl should be passed from Layout.tsx via customFields
 const defaultConfig: ChatConfig = {
-  apiUrl: 'https://humanoid-robotics-backend.up.railway.app',
+  apiUrl: 'https://humanoid-robotics-course-book-production.up.railway.app',
   title: 'Robotics Assistant',
   placeholder: 'Ask about humanoid robotics...',
   welcomeMessage: 'Hello! I can help you understand concepts from the Physical AI & Humanoid Robotics textbook. What would you like to learn about?'
