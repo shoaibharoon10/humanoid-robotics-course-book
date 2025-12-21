@@ -43,10 +43,15 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if not settings.is_production else None,
     )
 
-    # Configure CORS
+    # Configure CORS - include explicit Vercel URL
+    allowed_origins = settings.cors_origins_list.copy()
+    vercel_url = "https://humanoid-robotics-course-book.vercel.app"
+    if vercel_url not in allowed_origins:
+        allowed_origins.append(vercel_url)
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins_list,
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

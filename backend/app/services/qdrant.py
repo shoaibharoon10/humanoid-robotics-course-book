@@ -18,13 +18,17 @@ from app.config import get_settings
 class QdrantService:
     """Service for Qdrant vector operations."""
 
+    # Default collection name fallback
+    DEFAULT_COLLECTION_NAME = "humanoid_robotics_docs"
+
     def __init__(self):
         settings = get_settings()
         self.client = QdrantClient(
             url=settings.qdrant_url,
             api_key=settings.qdrant_api_key,
         )
-        self.collection_name = settings.collection_name
+        # Use collection_name from settings with fallback
+        self.collection_name = getattr(settings, 'collection_name', None) or self.DEFAULT_COLLECTION_NAME
         self.vector_size = 768  # Google text-embedding-004 dimension
 
     def ensure_collection(self):

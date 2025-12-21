@@ -1,9 +1,9 @@
 /* ChatWidget Styles */
 
-/* Floating Action Button */
+/* Floating Action Button - positioned to avoid overlap with other buttons */
 .chatFab {
   position: fixed;
-  bottom: 24px;
+  bottom: 90px;
   right: 24px;
   width: 56px;
   height: 56px;
@@ -39,7 +39,7 @@
   width: 380px;
   height: 550px;
   max-height: calc(100vh - 48px);
-  background: var(--ifm-background-color);
+  background-color: #ffffff !important;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   z-index: 99999;
@@ -61,7 +61,7 @@
 
 /* Dark mode - uses Docusaurus data-theme attribute */
 [data-theme='dark'] .chatDrawer {
-  background: var(--ifm-background-surface-color);
+  background-color: #1b1b1d !important;
   border-color: var(--ifm-color-emphasis-300);
 }
 
@@ -72,7 +72,11 @@
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
-  background: var(--ifm-background-surface-color);
+  background-color: #f5f6f7 !important;
+}
+
+[data-theme='dark'] .chatHeader {
+  background-color: #242526 !important;
 }
 
 .headerTitle {
@@ -119,6 +123,11 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background-color: #ffffff !important;
+}
+
+[data-theme='dark'] .messagesContainer {
+  background-color: #1b1b1d !important;
 }
 
 /* Message */
@@ -205,7 +214,11 @@
   gap: 8px;
   padding: 12px 16px;
   border-top: 1px solid var(--ifm-color-emphasis-200);
-  background: var(--ifm-background-surface-color);
+  background-color: #f5f6f7 !important;
+}
+
+[data-theme='dark'] .inputContainer {
+  background-color: #242526 !important;
 }
 
 .input {
@@ -216,8 +229,13 @@
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
-  background: var(--ifm-background-color);
-  color: var(--ifm-font-color-base);
+  background-color: #ffffff !important;
+  color: #1c1e21 !important;
+}
+
+[data-theme='dark'] .input {
+  background-color: #1b1b1d !important;
+  color: #e3e3e3 !important;
 }
 
 .input:focus {
@@ -283,7 +301,7 @@
   }
 
   .chatFab {
-    bottom: 16px;
+    bottom: 80px;
     right: 16px;
   }
 }
