@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import ChatWidget from '@site/src/components/ChatWidget';
 
 interface RootProps {
@@ -13,6 +14,9 @@ interface RootProps {
 }
 
 export default function Root({ children }: RootProps): JSX.Element {
+  const { siteConfig } = useDocusaurusContext();
+  const chatApiUrl = (siteConfig.customFields?.chatApiUrl as string) || 'https://humanoid-robotics-backend.up.railway.app';
+
   // Only render ChatWidget on client-side
   const [isMounted, setIsMounted] = React.useState(false);
 
@@ -26,7 +30,7 @@ export default function Root({ children }: RootProps): JSX.Element {
       {isMounted && (
         <ChatWidget
           config={{
-            apiUrl: process.env.REACT_APP_CHAT_API_URL || 'http://localhost:8000',
+            apiUrl: chatApiUrl,
             title: 'Robotics Assistant',
             placeholder: 'Ask about humanoid robotics...',
             welcomeMessage: 'Hello! I can help you understand concepts from the Physical AI & Humanoid Robotics textbook. What would you like to learn about?'

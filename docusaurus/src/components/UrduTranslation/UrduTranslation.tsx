@@ -1,45 +1,40 @@
 /**
  * UrduTranslation component - Button to translate page content to Urdu using Google Translate.
+ * Uses a simple URL redirect approach that works reliably on all platforms.
  */
 
 import React, { useState, useCallback } from 'react';
-import { useColorMode } from '@docusaurus/theme-common';
 import styles from './styles.module.css';
 
-interface UrduTranslationProps {
-  pageTitle?: string;
-}
-
-export default function UrduTranslation({ pageTitle }: UrduTranslationProps): JSX.Element {
-  const { colorMode } = useColorMode();
+export default function UrduTranslation(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTranslate = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
     setIsLoading(true);
 
     // Get the current page URL
     const currentUrl = window.location.href;
 
-    // Google Translate URL format
+    // Google Translate URL format - opens translated page in same tab
     const translateUrl = `https://translate.google.com/translate?sl=en&tl=ur&u=${encodeURIComponent(currentUrl)}`;
 
-    // Open in new tab
-    window.open(translateUrl, '_blank', 'noopener,noreferrer');
-
-    // Reset loading state
-    setTimeout(() => setIsLoading(false), 1000);
+    // Navigate to the translated page
+    window.location.href = translateUrl;
   }, []);
 
   return (
-    <div className={`${styles.container} ${styles[colorMode]}`}>
+    <div className={styles.container}>
       <button
         onClick={handleTranslate}
         className={styles.translateButton}
         disabled={isLoading}
-        title="Translate this page to Urdu"
+        title="Translate this page to Urdu (اردو میں ترجمہ کریں)"
         aria-label="Translate to Urdu"
       >
-        <span className={styles.flag}>
+        <span className={styles.flag} aria-hidden="true">
+          {/* Pakistan Flag SVG */}
           <svg viewBox="0 0 36 24" width="24" height="16">
             <rect fill="#01411C" width="36" height="24"/>
             <rect fill="#FFFFFF" width="9" height="24"/>
@@ -55,9 +50,9 @@ export default function UrduTranslation({ pageTitle }: UrduTranslationProps): JS
           </svg>
         </span>
         <span className={styles.buttonText}>
-          {isLoading ? 'Opening...' : 'Urdu Translation'}
+          {isLoading ? 'Translating...' : 'Urdu Translation'}
         </span>
-        <span className={styles.urduText}>اردو ترجمہ</span>
+        <span className={styles.urduText} dir="rtl">اردو ترجمہ</span>
       </button>
     </div>
   );

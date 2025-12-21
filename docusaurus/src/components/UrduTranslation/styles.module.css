@@ -50,20 +50,10 @@
 }
 
 .urduText {
-  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Segoe UI', serif;
   font-size: 0.9rem;
   margin-left: 0.25rem;
   opacity: 0.9;
-}
-
-/* Dark mode adjustments */
-.dark .translateButton {
-  border-color: #03a63c;
-  box-shadow: 0 2px 8px rgba(3, 166, 60, 0.2);
-}
-
-.dark .translateButton:hover:not(:disabled) {
-  box-shadow: 0 4px 16px rgba(3, 166, 60, 0.3);
 }
 
 /* Responsive */
