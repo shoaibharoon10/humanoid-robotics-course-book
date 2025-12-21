@@ -1,9 +1,9 @@
 /**
  * ChatWidget component - Floating chat interface for RAG chatbot.
+ * Note: Uses CSS-only dark mode detection to avoid ColorModeProvider dependency.
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useColorMode } from '@docusaurus/theme-common';
 import styles from './styles.module.css';
 import { useStreaming } from './useStreaming';
 import type { Message, Source, ChatConfig } from './types';
@@ -25,7 +25,7 @@ function getSessionId(): string {
   return sessionId;
 }
 
-// Default configuration - apiUrl should be passed from Root.tsx via customFields
+// Default configuration - apiUrl should be passed from Layout.tsx via customFields
 const defaultConfig: ChatConfig = {
   apiUrl: 'https://humanoid-robotics-backend.up.railway.app',
   title: 'Robotics Assistant',
@@ -39,7 +39,6 @@ interface ChatWidgetProps {
 
 export default function ChatWidget({ config = {} }: ChatWidgetProps): JSX.Element {
   const mergedConfig = { ...defaultConfig, ...config };
-  const { colorMode } = useColorMode();
 
   // State
   const [isOpen, setIsOpen] = useState(false);
@@ -182,8 +181,8 @@ export default function ChatWidget({ config = {} }: ChatWidgetProps): JSX.Elemen
         </svg>
       </button>
 
-      {/* Chat Drawer */}
-      <div className={`${styles.chatDrawer} ${isOpen ? styles.open : ''} ${styles[colorMode]}`}>
+      {/* Chat Drawer - dark mode handled via CSS [data-theme='dark'] selector */}
+      <div className={`${styles.chatDrawer} ${isOpen ? styles.open : ''}`}>
         {/* Header */}
         <div className={styles.chatHeader}>
           <div className={styles.headerTitle}>

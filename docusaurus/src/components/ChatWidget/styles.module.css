@@ -59,8 +59,8 @@
   pointer-events: auto;
 }
 
-/* Dark mode */
-.chatDrawer.dark {
+/* Dark mode - uses Docusaurus data-theme attribute */
+[data-theme='dark'] .chatDrawer {
   background: var(--ifm-background-surface-color);
   border-color: var(--ifm-color-emphasis-300);
 }
@@ -145,7 +145,7 @@
   border-bottom-left-radius: 4px;
 }
 
-.dark .message.assistant {
+[data-theme='dark'] .message.assistant {
   background: var(--ifm-color-emphasis-200);
 }
 
