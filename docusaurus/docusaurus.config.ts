@@ -2,17 +2,12 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-// Detect deployment platform
-const isVercel = process.env.VERCEL === '1';
+// Deployment configuration - Vercel is primary platform
+const url = 'https://humanoid-robotics-course-book.vercel.app';
+const baseUrl = '/';
 
-// Platform-specific configuration
-const url = isVercel
-  ? 'https://humanoid-robotics-course-book.vercel.app'
-  : 'https://shoaibharoon10.github.io';
-const baseUrl = isVercel ? '/' : '/humanoid-robotics-course-book/';
-
-// Backend API URL - defaults to production, can be overridden for local dev
-const chatApiUrl = process.env.CHAT_API_URL || 'https://humanoid-robotics-backend.up.railway.app';
+// Backend API URL - defaults to production Railway URL
+const chatApiUrl = process.env.CHAT_API_URL || 'https://humanoid-robotics-course-book-production.up.railway.app';
 
 const config: Config = {
   title: 'Physical AI & Humanoid Robotics',
