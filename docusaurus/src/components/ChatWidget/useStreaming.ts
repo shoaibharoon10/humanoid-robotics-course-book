@@ -28,6 +28,7 @@ export function useStreaming(apiUrl: string) {
     try {
       const response = await fetch(`${apiUrl}/api/v1/chat`, {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
         },
