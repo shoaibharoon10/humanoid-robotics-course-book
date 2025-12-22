@@ -2,7 +2,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-// Deployment configuration - Vercel is primary platform
+// Deployment configuration - Vercel is primary platform (v1.1)
 const url = 'https://humanoid-robotics-course-book.vercel.app';
 const baseUrl = '/';
 
