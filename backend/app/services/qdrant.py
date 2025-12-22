@@ -70,7 +70,7 @@ class QdrantService:
         filter_module: Optional[str] = None,
         score_threshold: float = 0.7
     ) -> List[Dict[str, Any]]:
-        """Search for similar documents."""
+        """Search for similar documents using qdrant-client 1.12+ API."""
         # Build filter if module specified
         search_filter = None
         if filter_module:
@@ -83,21 +83,23 @@ class QdrantService:
                 ]
             )
 
-        results = self.client.search(
+        # Use query_points (qdrant-client 1.12+) instead of deprecated search()
+        results = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
+            query=query_vector,
             limit=top_k,
             query_filter=search_filter,
             score_threshold=score_threshold
         )
 
+        # query_points returns QueryResponse with .points attribute
         return [
             {
-                "id": str(result.id),
-                "score": result.score,
-                "payload": result.payload
+                "id": str(point.id),
+                "score": point.score,
+                "payload": point.payload
             }
-            for result in results
+            for point in results.points
         ]
 
     def delete_collection(self):
