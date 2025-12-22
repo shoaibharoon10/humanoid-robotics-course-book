@@ -108,11 +108,16 @@ class QdrantService:
         """Get collection information."""
         try:
             info = self.client.get_collection(self.collection_name)
+            # Handle different qdrant-client versions
+            points_count = getattr(info, 'points_count', None) or 0
+            vectors_count = getattr(info, 'vectors_count', None) or points_count
+            status = getattr(info, 'status', None)
+            status_value = status.value if status else "unknown"
             return {
                 "name": self.collection_name,
-                "vectors_count": info.vectors_count,
-                "points_count": info.points_count,
-                "status": info.status.value
+                "vectors_count": vectors_count,
+                "points_count": points_count,
+                "status": status_value
             }
         except Exception as e:
             return {"error": str(e)}
@@ -136,17 +141,18 @@ class QdrantService:
                     "collection_name": self.collection_name
                 }
 
-            # Get collection details
+            # Get collection details - handle different qdrant-client versions
             info = self.client.get_collection(self.collection_name)
-            vectors_count = info.vectors_count or 0
-            points_count = info.points_count or 0
+
+            # Try different attribute names for vector/point count
+            points_count = getattr(info, 'points_count', None) or 0
+            vectors_count = getattr(info, 'vectors_count', None) or points_count
 
             return {
                 "healthy": True,
                 "status": "connected",
-                "detail": f"Collection '{self.collection_name}' has {vectors_count} vectors",
+                "detail": f"Collection '{self.collection_name}' has {points_count} points",
                 "collection_name": self.collection_name,
-                "vectors_count": vectors_count,
                 "points_count": points_count
             }
 
