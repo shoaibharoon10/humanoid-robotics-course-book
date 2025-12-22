@@ -17,7 +17,7 @@ type Props = WrapperProps<typeof LayoutType>;
 // ChatWidget loader - only rendered in browser, inside ColorModeProvider
 function ChatWidgetLoader(): JSX.Element | null {
   const { siteConfig } = useDocusaurusContext();
-  const chatApiUrl = (siteConfig.customFields?.chatApiUrl as string) || 'https://humanoid-robotics-backend.up.railway.app';
+  const chatApiUrl = (siteConfig.customFields?.chatApiUrl as string) || 'https://humanoid-robotics-course-book-production.up.railway.app';
 
   // Dynamically import ChatWidget to avoid SSR issues
   const ChatWidget = React.lazy(() => import('@site/src/components/ChatWidget'));
