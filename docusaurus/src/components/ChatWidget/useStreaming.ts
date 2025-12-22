@@ -26,9 +26,13 @@ export function useStreaming(apiUrl: string) {
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch(`${apiUrl}/api/v1/chat`, {
+      const fetchUrl = `${apiUrl}/api/v1/chat`;
+      console.log('Fetching from:', fetchUrl);
+
+      const response = await fetch(fetchUrl, {
         method: 'POST',
         mode: 'cors',
+        credentials: 'omit',
         headers: {
           'Content-Type': 'application/json',
         },

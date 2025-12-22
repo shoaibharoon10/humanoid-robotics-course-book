@@ -25,21 +25,12 @@ function getSessionId(): string {
   return sessionId;
 }
 
-// Production Railway URL
+// FORCE Production Railway URL - hardcoded to bypass any env variable issues
 const PRODUCTION_API_URL = 'https://humanoid-robotics-course-book-production.up.railway.app';
-const LOCAL_API_URL = 'http://localhost:8000';
 
-// Determine API URL based on environment
-function getApiUrl(): string {
-  if (typeof window === 'undefined') return PRODUCTION_API_URL;
-  const hostname = window.location.hostname;
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-  return isLocalhost ? LOCAL_API_URL : PRODUCTION_API_URL;
-}
-
-// Default configuration
+// Default configuration - always use production URL
 const defaultConfig: ChatConfig = {
-  apiUrl: PRODUCTION_API_URL, // Will be overridden by getApiUrl() in component
+  apiUrl: PRODUCTION_API_URL,
   title: 'Robotics Assistant',
   placeholder: 'Ask about humanoid robotics...',
   welcomeMessage: 'Hello! I can help you understand concepts from the Physical AI & Humanoid Robotics textbook. What would you like to learn about?'
@@ -50,8 +41,8 @@ interface ChatWidgetProps {
 }
 
 export default function ChatWidget({ config = {} }: ChatWidgetProps): JSX.Element {
-  // Merge config and use dynamic API URL
-  const mergedConfig = { ...defaultConfig, ...config, apiUrl: config.apiUrl || getApiUrl() };
+  // Merge config - FORCE production API URL
+  const mergedConfig = { ...defaultConfig, ...config, apiUrl: PRODUCTION_API_URL };
 
   // State
   const [isOpen, setIsOpen] = useState(false);
