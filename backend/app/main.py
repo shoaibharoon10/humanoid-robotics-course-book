@@ -1,7 +1,8 @@
 """FastAPI application entry point for RAG Chatbot."""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
 from app.config import get_settings
@@ -65,6 +66,27 @@ def create_app() -> FastAPI:
 
     # Include API routes
     app.include_router(router, prefix="/api/v1")
+
+    # Add global exception handler to ensure CORS headers on errors
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
+        """Handle all unhandled exceptions with proper CORS headers."""
+        print(f"Global exception handler caught: {type(exc).__name__}: {exc}")
+
+        # Build CORS headers for error response
+        origin = request.headers.get("origin", "*")
+        cors_headers = {
+            "Access-Control-Allow-Origin": origin if cors_origins != "*" else "*",
+            "Access-Control-Allow-Credentials": "true" if cors_origins != "*" else "false",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Internal server error: {str(exc)}"},
+            headers=cors_headers
+        )
 
     return app
 

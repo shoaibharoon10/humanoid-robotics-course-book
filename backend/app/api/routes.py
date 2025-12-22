@@ -62,76 +62,91 @@ async def chat_streaming(
     db: AsyncSession = Depends(get_db)
 ):
     """Chat endpoint with streaming response (SSE)."""
-    retrieval_service = get_retrieval_service()
-    chat_service = get_chat_service()
+    try:
+        retrieval_service = get_retrieval_service()
+        chat_service = get_chat_service()
 
-    # Get or create user
-    user = await _get_or_create_user(db, request.session_id)
+        # Get or create user
+        user = await _get_or_create_user(db, request.session_id)
 
-    # Get or create conversation
-    conversation = await _get_or_create_conversation(
-        db, user.id, request.conversation_id
-    )
-
-    # Retrieve relevant context
-    sources = await retrieval_service.retrieve(
-        query=request.message,
-        top_k=get_settings().retrieval_top_k
-    )
-    context = retrieval_service.build_context(sources)
-
-    # Get conversation history
-    history = await _get_conversation_history(db, conversation.id)
-
-    # Save user message
-    user_message = Message(
-        conversation_id=conversation.id,
-        role="user",
-        content=request.message
-    )
-    db.add(user_message)
-    await db.commit()
-
-    # Generate streaming response
-    async def generate():
-        full_response = ""
-
-        # Send sources first
-        sources_data = [s.model_dump() for s in sources]
-        yield f"data: {json.dumps({'type': 'sources', 'data': sources_data})}\n\n"
-
-        # Stream tokens
-        async for token in chat_service.generate_stream(
-            user_message=request.message,
-            context=context,
-            conversation_history=history
-        ):
-            full_response += token
-            yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
-
-        # Save assistant message
-        assistant_message = Message(
-            conversation_id=conversation.id,
-            role="assistant",
-            content=full_response,
-            sources=[s.model_dump() for s in sources],
-            model=get_settings().chat_model,
-            tokens_used=await chat_service.get_usage(request.message, context, full_response)
+        # Get or create conversation
+        conversation = await _get_or_create_conversation(
+            db, user.id, request.conversation_id
         )
-        db.add(assistant_message)
+
+        # Retrieve relevant context
+        sources = await retrieval_service.retrieve(
+            query=request.message,
+            top_k=get_settings().retrieval_top_k
+        )
+        context = retrieval_service.build_context(sources)
+
+        # Get conversation history
+        history = await _get_conversation_history(db, conversation.id)
+
+        # Save user message
+        user_message = Message(
+            conversation_id=conversation.id,
+            role="user",
+            content=request.message
+        )
+        db.add(user_message)
         await db.commit()
 
-        # Send completion
-        yield f"data: {json.dumps({'type': 'done', 'message_id': str(assistant_message.id), 'conversation_id': str(conversation.id)})}\n\n"
+        # Generate streaming response
+        async def generate():
+            full_response = ""
+            try:
+                # Send sources first
+                sources_data = [s.model_dump() for s in sources]
+                yield f"data: {json.dumps({'type': 'sources', 'data': sources_data})}\n\n"
 
-    return StreamingResponse(
-        generate(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-        }
-    )
+                # Stream tokens
+                async for token in chat_service.generate_stream(
+                    user_message=request.message,
+                    context=context,
+                    conversation_history=history
+                ):
+                    full_response += token
+                    yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+
+                # Save assistant message
+                assistant_message = Message(
+                    conversation_id=conversation.id,
+                    role="assistant",
+                    content=full_response,
+                    sources=[s.model_dump() for s in sources],
+                    model=get_settings().chat_model,
+                    tokens_used=await chat_service.get_usage(request.message, context, full_response)
+                )
+                db.add(assistant_message)
+                await db.commit()
+
+                # Send completion
+                yield f"data: {json.dumps({'type': 'done', 'message_id': str(assistant_message.id), 'conversation_id': str(conversation.id)})}\n\n"
+            except Exception as stream_error:
+                # Send error event to client
+                error_msg = str(stream_error)
+                print(f"Streaming error: {error_msg}")
+                yield f"data: {json.dumps({'type': 'error', 'error': error_msg})}\n\n"
+
+        return StreamingResponse(
+            generate(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            }
+        )
+    except Exception as e:
+        # Log the error for debugging
+        error_msg = str(e)
+        print(f"Chat endpoint error: {error_msg}")
+        # Return a proper JSON error response (not streaming)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Chat service error: {error_msg}"
+        )
 
 
 @router.post("/chat/sync", response_model=ChatResponse)
