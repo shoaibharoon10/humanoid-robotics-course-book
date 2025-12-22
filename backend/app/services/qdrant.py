@@ -117,6 +117,47 @@ class QdrantService:
         except Exception as e:
             return {"error": str(e)}
 
+    def check_health(self) -> Dict[str, Any]:
+        """
+        Check Qdrant health with detailed status.
+        Returns healthy if collection exists and has vectors.
+        """
+        try:
+            # First check if we can connect to Qdrant
+            collections = self.client.get_collections()
+            collection_names = [c.name for c in collections.collections]
+
+            # Check if our collection exists
+            if self.collection_name not in collection_names:
+                return {
+                    "healthy": False,
+                    "status": "collection_missing",
+                    "detail": f"Collection '{self.collection_name}' not found. Available: {collection_names}",
+                    "collection_name": self.collection_name
+                }
+
+            # Get collection details
+            info = self.client.get_collection(self.collection_name)
+            vectors_count = info.vectors_count or 0
+            points_count = info.points_count or 0
+
+            return {
+                "healthy": True,
+                "status": "connected",
+                "detail": f"Collection '{self.collection_name}' has {vectors_count} vectors",
+                "collection_name": self.collection_name,
+                "vectors_count": vectors_count,
+                "points_count": points_count
+            }
+
+        except Exception as e:
+            return {
+                "healthy": False,
+                "status": "connection_error",
+                "detail": str(e),
+                "collection_name": self.collection_name
+            }
+
 
 # Singleton instance
 _qdrant_service = None

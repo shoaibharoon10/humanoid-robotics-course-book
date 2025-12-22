@@ -97,4 +97,5 @@ class HealthResponse(BaseModel):
     status: str
     database: str
     qdrant: str
+    qdrant_detail: Optional[str] = None
     llm: str

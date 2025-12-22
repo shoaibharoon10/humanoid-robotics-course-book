@@ -35,19 +35,23 @@ async def health_check():
     """Health check endpoint - returns 200 quickly for Railway healthchecks."""
     settings = get_settings()
 
-    # Quick checks - don't block on external services
+    # Check Qdrant with detailed status
     qdrant_status = "unknown"
+    qdrant_detail = None
     try:
         qdrant = get_qdrant_service()
-        qdrant_info = qdrant.get_collection_info()
-        qdrant_status = "healthy" if "error" not in qdrant_info else "unhealthy"
-    except Exception:
-        qdrant_status = "unhealthy"
+        health_info = qdrant.check_health()
+        qdrant_status = "healthy" if health_info.get("healthy") else "unhealthy"
+        qdrant_detail = health_info.get("detail")
+    except Exception as e:
+        qdrant_status = "error"
+        qdrant_detail = str(e)
 
     return HealthResponse(
         status="healthy",
         database="available",  # DB initializes async, assume available
         qdrant=qdrant_status,
+        qdrant_detail=qdrant_detail,
         llm="configured" if settings.google_api_key else "missing"
     )
 
