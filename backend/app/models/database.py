@@ -117,11 +117,54 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db():
-    """Initialize the database by creating all tables."""
+    """Initialize the database by creating all tables and running migrations."""
     try:
         engine = get_engine()
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+
+        # Run schema migrations for auth columns
+        await run_auth_migrations(engine)
     except Exception as e:
         print(f"Warning: Database initialization failed: {e}")
         print("Application will continue but database features may be unavailable")
+
+
+async def run_auth_migrations(engine):
+    """Add authentication columns to users table if they don't exist."""
+    from sqlalchemy import text
+
+    migrations = [
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) UNIQUE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS hashed_password VARCHAR(255)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active INTEGER DEFAULT 1",
+    ]
+
+    async with engine.begin() as conn:
+        for sql in migrations:
+            try:
+                await conn.execute(text(sql))
+                print(f"Migration OK: {sql[:40]}...")
+            except Exception as e:
+                # Column likely already exists
+                if "already exists" not in str(e).lower() and "duplicate" not in str(e).lower():
+                    print(f"Migration skip: {sql[:40]}... ({type(e).__name__})")
+
+        # Try to make session_id nullable (for auth users who don't need session_id)
+        try:
+            await conn.execute(text("ALTER TABLE users ALTER COLUMN session_id DROP NOT NULL"))
+            print("Migration OK: session_id now nullable")
+        except Exception:
+            pass  # Already nullable or doesn't support ALTER
+
+        # Create indexes
+        try:
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_email ON users(email)"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_username ON users(username)"))
+            print("Migration OK: indexes created")
+        except Exception:
+            pass
+
+    print("Auth migrations complete")
