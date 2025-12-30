@@ -1,9 +1,13 @@
 /**
  * Custom hook for handling SSE streaming from the chat API.
+ * Includes JWT authentication for protected endpoints.
  */
 
 import { useCallback, useRef } from 'react';
+import Cookies from 'js-cookie';
 import type { Source, StreamEvent } from './types';
+
+const TOKEN_COOKIE = 'auth_token';
 
 interface StreamingOptions {
   onToken: (token: string) => void;
@@ -29,13 +33,23 @@ export function useStreaming(apiUrl: string) {
       const fetchUrl = `${apiUrl}/api/v1/chat`;
       console.log('Fetching from:', fetchUrl);
 
+      // Get auth token from cookies
+      const authToken = Cookies.get(TOKEN_COOKIE);
+
+      // Build headers with authorization
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+
       const response = await fetch(fetchUrl, {
         method: 'POST',
         mode: 'cors',
         credentials: 'omit',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           message,
           conversation_id: conversationId,
@@ -45,6 +59,9 @@ export function useStreaming(apiUrl: string) {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please log in to use the chat.');
+        }
         throw new Error(`API error: ${response.status}`);
       }
 

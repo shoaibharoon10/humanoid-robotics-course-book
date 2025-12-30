@@ -46,22 +46,38 @@ def create_app() -> FastAPI:
 
     # Configure CORS - support wildcard or explicit origins
     cors_origins = settings.cors_origins.strip()
+
+    # Define allowed origins and regex patterns
+    allowed_origins = []
+    allow_origin_regex = None
+
     if cors_origins == "*":
-        # Allow all origins
+        # Allow all origins (for development/testing)
         allowed_origins = ["*"]
     else:
-        # Use configured origins + explicit Vercel URL
+        # Use configured origins + Vercel URLs
         allowed_origins = settings.cors_origins_list.copy()
+
+        # Add main Vercel production URL
         vercel_url = "https://humanoid-robotics-course-book.vercel.app"
         if vercel_url not in allowed_origins:
             allowed_origins.append(vercel_url)
 
+        # Add localhost for development
+        if "http://localhost:3000" not in allowed_origins:
+            allowed_origins.append("http://localhost:3000")
+
+        # Regex pattern to allow all Vercel preview URLs
+        # Matches: https://*.vercel.app
+        allow_origin_regex = r"https://.*\.vercel\.app"
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,
+        allow_origin_regex=allow_origin_regex,
         allow_credentials=cors_origins != "*",  # credentials not allowed with wildcard
         allow_methods=["*"],
-        allow_headers=["*"],
+        allow_headers=["*", "Authorization"],  # Explicitly allow Authorization header
     )
 
     # Include API routes

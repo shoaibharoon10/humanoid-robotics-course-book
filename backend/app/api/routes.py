@@ -3,9 +3,9 @@
 import json
 import uuid
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -21,10 +21,20 @@ from app.models.schemas import (
     MessageResponse,
     HealthResponse,
     Source,
+    UserCreate,
+    UserLogin,
+    Token,
+    UserResponse,
 )
 from app.services.retrieval import get_retrieval_service
 from app.services.chat import get_chat_service
 from app.services.qdrant import get_qdrant_service
+from app.services.auth import (
+    get_password_hash,
+    create_access_token,
+    authenticate_user,
+    get_current_user,
+)
 from app.config import get_settings
 
 router = APIRouter()
@@ -56,18 +66,111 @@ async def health_check():
     )
 
 
+# ==================== Authentication Routes ====================
+
+@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def signup(
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Register a new user."""
+    # Check if email already exists
+    result = await db.execute(
+        select(User).where(User.email == user_data.email)
+    )
+    if result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+
+    # Check if username already exists
+    result = await db.execute(
+        select(User).where(User.username == user_data.username)
+    )
+    if result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already taken"
+        )
+
+    # Create new user
+    hashed_password = get_password_hash(user_data.password)
+    new_user = User(
+        email=user_data.email,
+        username=user_data.username,
+        phone_number=user_data.phone_number,
+        hashed_password=hashed_password,
+        is_active=1
+    )
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+
+    return UserResponse(
+        id=new_user.id,
+        email=new_user.email,
+        username=new_user.username,
+        phone_number=new_user.phone_number,
+        created_at=new_user.created_at
+    )
+
+
+@router.post("/login", response_model=Token)
+async def login(
+    credentials: UserLogin,
+    db: AsyncSession = Depends(get_db)
+):
+    """Authenticate user and return JWT token."""
+    user = await authenticate_user(db, credentials.email, credentials.password)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Create access token
+    settings = get_settings()
+    access_token_expires = timedelta(minutes=settings.jwt_access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": str(user.id), "email": user.email},
+        expires_delta=access_token_expires
+    )
+
+    return Token(access_token=access_token, token_type="bearer")
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user)
+):
+    """Get current authenticated user information."""
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        username=current_user.username,
+        phone_number=current_user.phone_number,
+        created_at=current_user.created_at
+    )
+
+
+# ==================== Chat Routes ====================
+
 @router.post("/chat")
 async def chat_streaming(
     request: ChatRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Chat endpoint with streaming response (SSE)."""
+    """Chat endpoint with streaming response (SSE). Requires authentication."""
     try:
         retrieval_service = get_retrieval_service()
         chat_service = get_chat_service()
 
-        # Get or create user
-        user = await _get_or_create_user(db, request.session_id)
+        # Use the authenticated user instead of session-based user
+        user = current_user
 
         # Get or create conversation
         conversation = await _get_or_create_conversation(

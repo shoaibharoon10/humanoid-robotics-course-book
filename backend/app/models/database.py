@@ -19,11 +19,18 @@ class Base(DeclarativeBase):
 
 
 class User(Base):
-    """User model for session management."""
+    """User model for authentication and session management."""
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(String(255), unique=True, nullable=False, index=True)
+    # Authentication fields
+    email = Column(String(255), unique=True, nullable=True, index=True)
+    username = Column(String(100), unique=True, nullable=True, index=True)
+    phone_number = Column(String(20), nullable=True)
+    hashed_password = Column(String(255), nullable=True)
+    is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive
+    # Legacy session field for backward compatibility
+    session_id = Column(String(255), unique=True, nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_active = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     metadata_ = Column("metadata", JSON, default={})
